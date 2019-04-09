@@ -9,7 +9,7 @@
 
 from dnfpluginscore import logger
 
-import os
+import subprocess
 import dnf
 
 
@@ -17,20 +17,25 @@ class Etckeeper(dnf.Plugin):
 
     name = 'etckeeper'
 
-    def _out(self, msg):
-        logger.debug('Etckeeper plugin: %s', msg)
+    def _run_command(self, command):
+        logger.debug('Etckeeper plugin: %s', command)
+        try:
+            with open("/dev/null", "wb") as devnull:
+                ret = subprocess.call(("etckeeper", command),
+                                      stdout=devnull, stderr=devnull,
+                                      close_fds=True)
+                if ret > 0:
+                    logger.warning('"etckeeper %s" failed (exit code %d)' % (command, ret))
+                if ret < 0:
+                    logger.warning('"etckeeper %s" died (signal %d)' % (command, -ret))
+        except OSError as err:
+            logger.warning('Failed to run "etckeeper %s": %s' % (command, err))
 
     def resolved(self):
-        self._out('pre transaction commit')
-        command = '%s %s' % ('etckeeper', " pre-install")
-        ret = os.system(command)
-        if ret != 0:
-            raise dnf.exceptions.Error('etckeeper returned %d' % (ret >> 8))
+        self._run_command("pre-install")
 
     def transaction(self):
-        self._out('post transaction commit')
-        command = '%s %s > /dev/null' % ('etckeeper', "post-install")
-        os.system(command)
+        self._run_command("post-install")
 
 if __name__ == "__main__":
     from distutils.core import setup
