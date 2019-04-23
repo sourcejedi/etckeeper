@@ -7,10 +7,11 @@
 # Distutils code below was copied from etckeeper-bzr distributed with v1.15
 #
 
-from dnfpluginscore import logger
-
+import logging
 import subprocess
 import dnf
+
+logger = logging.getLogger('dnf.plugin')
 
 
 class Etckeeper(dnf.Plugin):
