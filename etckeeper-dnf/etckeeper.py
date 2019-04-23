@@ -8,11 +8,13 @@
 #
 
 from __future__ import unicode_literals
-from dnfpluginscore import logger
 
+import logging
 import subprocess
 import locale
 import dnf
+
+logger = logging.getLogger('dnf.plugin')
 
 
 class Etckeeper(dnf.Plugin):
